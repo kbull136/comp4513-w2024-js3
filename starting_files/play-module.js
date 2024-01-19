@@ -1,80 +1,107 @@
 /* In this module, create three classes: Play, Act, and Scene. */
 
 class Play {
-    constructor(fetchedPlay){
+    constructor(fetchedPlay) {
         this.acts = [];
         this.title = fetchedPlay.title;
         this.short = fetchedPlay.short;
-        this.persona = fetchedPlay.persona;
+        this.persona = fetchedPlay.persona.sort((p1, p2) => p1.player.localeCompare(p2.player), { case: false });
 
-        fetchedPlay.acts.forEach( act => {
+        fetchedPlay.acts.forEach(act => {
             this.acts.push(new Act(act));
-        })
+        });
     }
 
-    displayFirstAct() {
+    /**
+     * Finds and returns the Act object based on the parameter
+     * 
+     * @param {string} currAct the current act being searched, default string is 'ACT I'
+     * @returns {object} the searched Act object
+     */
+    getAct(currAct = "ACT I") {
+        return this.acts.find(act => currAct == act.name);
+    }
 
+    /**
+     * Populates all the play Actors options into a Select element
+     */
+    displayPlayerSelection() {
+        const playerList = document.querySelector('#playerList');
+        const placeholder = playerList.firstElementChild;
+
+        playerList.replaceChildren();
+        playerList.appendChild(placeholder);
+
+        this.persona.forEach(p => {
+            let opt = document.createElement('option');
+            opt.textContent = p.player;
+            opt.setAttribute('value', p.player);
+            playerList.appendChild(opt);
+        });
+
+
+    }
+
+    /**
+     * Populates all Act options into a Select element
+     */
+    displayActSelection() {
+        const actList = document.querySelector('#actList');
+        const actArr = this.acts;
+        actList.replaceChildren();
+
+        actArr.forEach(act => {
+            let opt = document.createElement('option');
+            opt.textContent = act.name;
+            opt.setAttribute('value', act.name);
+            actList.appendChild(opt);
+        })
     }
 }
 
 class Act {
-    constructor(act){
+    constructor(act) {
         this.name = act.name;
         this.scenes = [];
 
-        act.scenes.forEach( scn => {
+        act.scenes.forEach(scn => {
             this.scenes.push(new Scene(scn));
         });
     }
 
-    displayFirstScene() {
-        const sceneDiv = document.querySelector('#sceneHere');
-        const sceneName = document.querySelector('#sceneHere h4');
-        const sceneTitle = document.querySelector("#sceneHere .title");
-        const stageDir = document.querySelector('.direction');
-        //const scene
+    /**
+     * Finds and returns the Scene object based on the parameter
+     * 
+     * @param {string} currScn the current scene being searched, default string is 'SCENE I'
+     * @returns the searched Scene object
+     */
+    getScene(currScn = "SCENE I") {
+        return this.scenes.find(scn => currScn == scn.name);
+    }
 
-        this.scenes.forEach( (scene) => {
-            if(scene.name == "SCENE I") {
-                sceneName.textContent = scene.name;
-                sceneTitle.textContent = scene.title;
-                stageDir.textContent = scene.stageDirection;
+    /**
+     * Populates all the Scenes into a Select element
+     */
+    displaySceneSelection() {
+        const sceneList = document.querySelector('#sceneList');
+        sceneList.replaceChildren();
 
-                scene.speeches.forEach( speech => {
-                    sceneDiv.append(createSpeech(speech.speaker, speech.lines));
-                });
-
-            }
+        this.scenes.forEach(scn => {
+            let opt = document.createElement('option');
+            opt.textContent = scn.name;
+            opt.value = scn.name;
+            sceneList.appendChild(opt);
         });
     }
 }
 
 class Scene {
-    constructor(scene){
+    constructor(scene) {
         this.speeches = scene.speeches;
-        this.stageDirection = scene.stageDirection;
+        this.mainStageDirection = scene.stageDirection;
         this.title = scene.title;
         this.name = scene.name;
     }
-
-    createSpeech(speaker, lines) {
-        const div = document.createElement('div');
-        const span = document.createElement('span').textContent = speaker;
-        
-        div.setAttribute('class', "speech");
-        div.append(span);
-
-        lines.forEach(line => {
-            const p = document.createElement('p').textContent = line;
-            div.append(p);
-        });
-
-
-
-
-        return div;
-    }
-
 }
 
-export {Play}
+export default Play;
