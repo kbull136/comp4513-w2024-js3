@@ -188,10 +188,12 @@ document.addEventListener("DOMContentLoaded", function () {
       span.textContent = speech.speaker;
       div.append(span);
 
+      let newHighlight = modifyHighlight(highlight);
+
       speech.lines.forEach(line => {
 
          if (highlight !== "") {
-            let highlighted = highlightWord(line, highlight);
+            let highlighted = highlightWord(line, newHighlight);
             div.appendChild(highlighted);
 
          } else {
@@ -220,13 +222,14 @@ document.addEventListener("DOMContentLoaded", function () {
       let p = document.createElement('p');
       p.textContent = "";
 
-      let highlightedArr = [...line.toLowerCase().matchAll(highlight.toLowerCase())];
+      let highlightedArr = [...line.matchAll(new RegExp(highlight, 'gui'))];
+
       let position = 0;
 
       highlightedArr.forEach(h => {
          let b = document.createElement('b');
          let l = document.createTextNode(line.substring(position, h.index));
-         b.textContent = highlight;
+         b.textContent = h;
 
          position = h.index + highlight.length;
 
@@ -255,4 +258,24 @@ document.addEventListener("DOMContentLoaded", function () {
          console.log(err);
       }
    }
+
+   /**
+    * Modifies the search word to be Regex-searchable for the special characters "." and "?"
+    * 
+    * @param {String} highlight The search string
+    * @returns {String} the modified string
+    */
+   function modifyHighlight(highlight) {
+      // Define the regular expression to match special characters
+      const specialChars = /[?]/g;
+
+      let modifiedString;
+      if (highlight == ".") {
+         modifiedString = highlight.replace(".", "\\.");
+      } else {
+         modifiedString = highlight.replace(specialChars, match => `\\${match}`);
+      };
+      return modifiedString;
+   }
+
 });
